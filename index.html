@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Requisição de Coleta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+:root{
+  --bg:#F3F5F6; --surface:#FFFFFF; --ink:#16252C; --muted:#5B6B73; --line:#D8DFE2;
+  --brand:#1F4E5F; --brand-ink:#FFFFFF; --accent:#E0A100; --accent-soft:#FFF4D6;
+  --ok:#2E7D4F; --ok-soft:#E3F3E9; --warn-ink:#7A5600; --danger:#B3261E; --field:#FBFCFC;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0F171B; --surface:#172228; --ink:#E4ECEF; --muted:#94A6AE; --line:#2A3A42;
+    --brand:#5FA3BA; --brand-ink:#0F171B; --accent:#F0B429; --accent-soft:#3A2F12;
+    --ok:#6CC592; --ok-soft:#173226; --warn-ink:#F0C860; --danger:#F08A82; --field:#121C21;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F171B; --surface:#172228; --ink:#E4ECEF; --muted:#94A6AE; --line:#2A3A42;
+  --brand:#5FA3BA; --brand-ink:#0F171B; --accent:#F0B429; --accent-soft:#3A2F12;
+  --ok:#6CC592; --ok-soft:#173226; --warn-ink:#F0C860; --danger:#F08A82; --field:#121C21;
+}
+*{box-sizing:border-box}
+body{margin:0}
+.auth{display:flex;gap:6px;align-items:center}
+#loginBox{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 14px;margin:-12px 0 20px}
+#loginBox input{width:auto;flex:1 1 180px}
+#loginBox .msg{flex-basis:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:20px;padding-block:28px 48px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:14px;margin-bottom:24px}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;background:var(--accent);color:#1b1400;padding:3px 8px;border-radius:3px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,44px);line-height:1;margin:8px 0 0;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
+.sync{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.dot.on{background:var(--ok)}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px}
+form.panel{padding:20px;display:grid;gap:14px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+@media (max-width:860px){form.panel{position:static}}
+h2{font-family:var(--display);font-weight:600;font-size:22px;text-transform:uppercase;letter-spacing:.03em;margin:0}
+label{display:grid;gap:5px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+label .opt{font-weight:400;text-transform:none;letter-spacing:0}
+input,select,textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:4px;padding:9px 10px;width:100%;text-transform:none;letter-spacing:0}
+textarea{resize:vertical;min-height:60px}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.row2{display:grid;grid-template-columns:1fr 110px;gap:10px}
+button{font:inherit;cursor:pointer;border-radius:4px}
+.primary{background:var(--brand);color:var(--brand-ink);border:0;padding:11px 14px;font-weight:600;font-size:15px}
+.primary:disabled{opacity:.5;cursor:not-allowed}
+.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);padding:7px 11px;font-size:13px}
+.ghost:hover{border-color:var(--muted)}
+.msg{font-size:13px;min-height:1.2em;color:var(--ok)}
+.msg.err{color:var(--danger)}
+.summary{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.stat{flex:1 1 140px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+.stat b{display:block;font-family:var(--mono);font-size:26px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.stat.pend b{color:var(--warn-ink)}
+.stat.done b{color:var(--ok)}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.toolbar select{width:auto;min-width:160px;padding:7px 9px;font-size:14px}
+.chips{display:flex;gap:4px;background:var(--bg);padding:3px;border-radius:5px}
+.chips button{border:0;background:transparent;color:var(--muted);padding:6px 10px;font-size:13px;font-weight:500}
+.chips button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.spacer{flex:1}
+.list{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:620px}
+th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:10px 14px;border-bottom:1px solid var(--line)}
+td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.qty{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+th.qty{text-align:right}
+.item{font-weight:600}
+.sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+.loja{display:inline-block;font-size:12.5px;font-weight:600;border:1px solid var(--line);border-radius:3px;padding:2px 7px;white-space:nowrap}
+.status{border:0;font-size:12px;font-weight:600;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.status.pendente{background:var(--accent-soft);color:var(--warn-ink)}
+.status.coletado{background:var(--ok-soft);color:var(--ok)}
+tr.is-done .item{text-decoration:line-through;text-decoration-color:var(--muted)}
+.acts{white-space:nowrap;text-align:right}
+.del{background:transparent;border:0;color:var(--muted);font-size:13px;padding:4px 6px}
+.del.confirm{color:var(--danger);font-weight:600}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px}
+@media (prefers-reduced-motion:no-preference){tr{transition:background .2s}}
+.status.enviado{background:color-mix(in srgb,var(--brand) 16%,transparent);color:var(--brand)}
+select.status{width:auto;appearance:none;-webkit-appearance:none;cursor:pointer;padding:4px 10px;border:0}
+.role{font-size:12px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;border:1px solid var(--line);border-radius:3px;padding:2px 7px;color:var(--muted)}
+.report{padding:18px 20px;margin-top:18px;display:grid;gap:12px}
+.report p{margin:0;color:var(--muted);font-size:13.5px;max-width:62ch}
+.rgrid{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.rgrid label{flex:1 1 200px}
+.check{display:flex;align-items:center;gap:8px;font-size:13.5px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--ink)}
+.check input{width:auto}
+.rbtns{display:flex;flex-wrap:wrap;gap:8px}
+.primary.sm{padding:9px 14px;font-size:14px}
+.grid{grid-template-columns:1fr}
+form.panel{position:static}
+.fhead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px}
+.hint{font-size:12.5px;color:var(--muted)}
+.frow{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.sheet-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:4px}
+table.sheet{min-width:640px;border-collapse:collapse;background:var(--field)}
+.sheet th{padding:7px 8px;background:var(--bg);border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+.sheet td{padding:0;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+.sheet th:last-child,.sheet td:last-child{border-right:0}
+.sheet tr:last-child td{border-bottom:0}
+.sheet .n{width:34px;text-align:center}
+.sheet td.n{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--bg)}
+.sheet .q{width:90px}.sheet .u{width:96px}.sheet .x{width:34px}
+.sheet input,.sheet select{border:0;border-radius:0;background:transparent;padding:9px 8px;font-size:14.5px}
+.sheet td.q input{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.sheet input:focus-visible,.sheet select:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;background:var(--surface)}
+.sheet td.bad{box-shadow:inset 0 0 0 2px var(--danger)}
+.sheet .rm{border:0;background:transparent;color:var(--muted);width:100%;padding:8px 0;font-size:16px;line-height:1}
+.sheet .rm:hover{color:var(--danger)}
+.factions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <span class="tag">Manutenção → Compras</span>
+      <h1>Requisição de Coleta de Material</h1>
+    </div>
+    <div class="sync"><span class="dot" id="dot"></span><span id="syncTxt">Conectando…</span></div>
+  </header>
+
+  <div class="grid">
+    <form class="panel" id="f" novalidate>
+      <div class="fhead">
+        <h2>Nova requisição</h2>
+        <span class="hint">Enter desce para a próxima linha · dá para colar várias linhas direto do Excel</span>
+      </div>
+      <div class="frow">
+        <label for="loja">Loja
+          <input id="loja" list="lojasList" placeholder="Ex.: Loja 04 – Centro" autocomplete="off" required>
+          <datalist id="lojasList"></datalist>
+        </label>
+        <label for="solic">Solicitante <span class="opt">(opcional)</span>
+          <input id="solic" placeholder="Seu nome">
+        </label>
+      </div>
+      <div class="sheet-wrap">
+        <table class="sheet">
+          <thead><tr><th class="n">#</th><th>Item / material</th><th class="q">Qtd.</th><th class="u">Un.</th><th>Observação</th><th class="x"></th></tr></thead>
+          <tbody id="sheet"></tbody>
+        </table>
+      </div>
+      <div class="factions">
+        <button type="button" class="ghost" id="addRow">+ Linha</button>
+        <button type="button" class="ghost" id="add5">+ 5 linhas</button>
+        <button type="button" class="ghost" id="clearSheet">Limpar</button>
+        <span class="spacer"></span>
+        <button class="primary" id="btnAdd" type="submit">Registrar itens</button>
+      </div>
+      <div class="msg" id="msg" role="status"></div>
+    </form>
+
+    <section>
+      <div class="summary">
+        <div class="stat"><b id="sTotal">0</b><span>Requisições</span></div>
+        <div class="stat pend"><b id="sPend">0</b><span>Pendentes</span></div>
+        <div class="stat"><b id="sEnv">0</b><span>Enviadas à loja</span></div>
+        <div class="stat done"><b id="sDone">0</b><span>Coletadas</span></div>
+      </div>
+      <div class="panel">
+        <div class="toolbar">
+          <select id="fLoja" aria-label="Filtrar por loja"><option value="">Todas as lojas</option></select>
+          <div class="chips" role="group" aria-label="Filtrar por status">
+            <button type="button" data-s="" aria-pressed="false">Todas</button>
+            <button type="button" data-s="aberto" aria-pressed="true">Em aberto</button>
+            <button type="button" data-s="coletado" aria-pressed="false">Coletadas</button>
+          </div>
+          <span class="spacer"></span>
+          <button type="button" class="ghost" id="btnCopy">Copiar lista</button>
+        </div>
+        <div class="list">
+          <table>
+            <thead><tr><th>Item</th><th class="qty">Qtd.</th><th>Loja</th><th>Status</th><th></th></tr></thead>
+            <tbody id="tb"></tbody>
+          </table>
+          <div class="empty" id="empty" hidden></div>
+        </div>
+      </div>
+
+      <div class="panel report" id="report">
+        <h2>Relatório para a loja</h2>
+        <p>Gera um PDF com os itens em aberto de uma loja, com número do relatório e campos de assinatura, pronto para enviar por e-mail ou WhatsApp.</p>
+        <div class="rgrid">
+          <label for="rLoja">Loja
+            <select id="rLoja"><option value="">Selecione a loja</option></select>
+          </label>
+          <label for="rInc">Incluir
+            <select id="rInc">
+              <option value="pendente">Só pendentes (ainda não enviados)</option>
+              <option value="aberto">Pendentes e já enviados</option>
+            </select>
+          </label>
+        </div>
+        <label class="check" for="rMark"><input type="checkbox" id="rMark" checked> Marcar os itens como “Enviado à loja” depois de gerar</label>
+        <div class="rbtns">
+          <button type="button" class="primary sm" id="btnPdf">Gerar PDF</button>
+          <button type="button" class="ghost" id="btnRCopy">Copiar como texto</button>
+        </div>
+        <div class="msg" id="rMsg" role="status"></div>
+      </div>
+
+      <p class="note" id="note">Registre os materiais para coleta na planilha. Altere o status na lista e gere o PDF para enviar à loja.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ===== CONFIGURAÇÃO DO SUPABASE =====
+  const SUPABASE_URL = "https://ehpfqnfzyxonifdlnsvc.supabase.co";      // ex.: https://abcdxyz.supabase.co
+  const SUPABASE_ANON_KEY = "sb_publishable_fYDGVRGc3YmegLKpt5dRjg_cGs9tJI4";       // chave pública "anon" / "publishable"
+  const TABLE = "coleta_requisicoes";
+  // ====================================
+
+  const $ = id => document.getElementById(id);
+  const ST = {pendente:"Pendente", enviado:"Enviado à loja", coletado:"Coletado"};
+  let sb=null, isCompras=true, rows=[], fStatus="aberto", pendingDel=null, delTimer=null, ready=false;
+
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const fmtQ = n => Number(n).toLocaleString("pt-BR",{maximumFractionDigits:3});
+  const fmtD = iso => { try { return new Date(iso).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"}); } catch(e){ return ""; } };
+  const stOf = r => ST[r.status] ? r.status : "pendente";
+  const fromDb = d => ({id:d.id, loja:d.loja, item:d.item, quantidade:Number(d.quantidade), unidade:d.unidade, obs:d.obs, solicitante:d.solicitante, status:d.status, lote:d.lote, criadoEm:d.criado_em});
+
+  function flash(el,t,err){ el.textContent=t; el.className="msg"+(err?" err":""); if(t) setTimeout(()=>{ if(el.textContent===t) el.textContent=""; },5000); }
+  const say=(t,e)=>flash($("msg"),t,e), rsay=(t,e)=>flash($("rMsg"),t,e);
+  function setSync(on, txt){ $("dot").className="dot"+(on?" on":""); $("syncTxt").textContent=txt; }
+  function lojas(){ return [...new Set(rows.map(r=>r.loja).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"pt-BR")); }
+  function fillSelect(sel, ls, first){ const cur=sel.value; sel.innerHTML=`<option value="">${first}</option>`+ls.map(l=>`<option value="${esc(l)}">${esc(l)}</option>`).join(""); sel.value=ls.includes(cur)?cur:""; }
+
+  // ---------- dados ----------
+  async function loadAll(){
+    const {data,error}=await sb.from(TABLE).select("*").order("criado_em",{ascending:false}).limit(2000);
+    if(error){ setSync(false,"Erro ao carregar: "+error.message); return; }
+    rows=data.map(fromDb); ready=true; setSync(true,"Sincronizado em tempo real"); render();
+  }
+  function applyChange(p){
+    if(p.eventType==="DELETE"){ rows=rows.filter(r=>r.id!==p.old.id); }
+    else { const n=fromDb(p.new); const i=rows.findIndex(r=>r.id===n.id); if(i>=0) rows[i]=n; else rows.unshift(n); rows.sort((a,b)=>String(b.criadoEm).localeCompare(String(a.criadoEm))); }
+    render();
+  }
+  async function patch(id, obj){ const {error}=await sb.from(TABLE).update(obj).eq("id",id); if(error) throw error; }
+
+  function render(){
+    const ls=lojas();
+    $("lojasList").innerHTML = ls.map(l=>`<option value="${esc(l)}">`).join("");
+    fillSelect($("fLoja"), ls, "Todas as lojas");
+    fillSelect($("rLoja"), ls, "Selecione a loja");
+    const fl=$("fLoja").value;
+    const scope = rows.filter(r=>!fl || r.loja===fl);
+    $("sTotal").textContent=scope.length;
+    $("sPend").textContent=scope.filter(r=>stOf(r)==="pendente").length;
+    $("sEnv").textContent=scope.filter(r=>stOf(r)==="enviado").length;
+    $("sDone").textContent=scope.filter(r=>stOf(r)==="coletado").length;
+    const vis = scope.filter(r=>!fStatus || (fStatus==="coletado" ? stOf(r)==="coletado" : stOf(r)!=="coletado"));
+    $("tb").innerHTML = vis.map(r=>{
+      const st=stOf(r);
+      const sub=[r.solicitante&&("por "+esc(r.solicitante)), fmtD(r.criadoEm)].filter(Boolean).join(" · ");
+      const stCell = isCompras
+        ? `<select class="status ${st}" data-st="${esc(r.id)}" aria-label="Status">${Object.keys(ST).map(k=>`<option value="${k}"${k===st?" selected":""}>${ST[k]}</option>`).join("")}</select>`
+        : `<span class="status ${st}">${ST[st]}</span>`;
+      const del = isCompras ? `<button type="button" class="del${pendingDel===r.id?" confirm":""}" data-del="${esc(r.id)}">${pendingDel===r.id?"Confirmar exclusão":"Excluir"}</button>` : "";
+      return `<tr class="${st==="coletado"?"is-done":""}">
+        <td><div class="item">${esc(r.item)}</div><div class="sub">${sub}</div>${r.obs?`<div class="sub">${esc(r.obs)}</div>`:""}</td>
+        <td class="qty">${fmtQ(r.quantidade)} ${esc(r.unidade||"")}</td>
+        <td><span class="loja">${esc(r.loja)}</span></td>
+        <td>${stCell}</td>
+        <td class="acts">${del}</td></tr>`;
+    }).join("");
+    const e=$("empty");
+    if(!vis.length){
+      e.hidden=false;
+      e.innerHTML = !ready ? "<strong>Carregando requisições…</strong>" :
+        rows.length ? "<strong>Nada neste filtro.</strong>Troque a loja ou o status acima." :
+        "<strong>Nenhuma requisição ainda.</strong>Preencha a planilha acima para registrar a primeira coleta.";
+    } else e.hidden=true;
+  }
+
+  document.querySelectorAll(".chips button").forEach(b=>b.addEventListener("click",()=>{
+    fStatus=b.dataset.s;
+    document.querySelectorAll(".chips button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+    render();
+  }));
+  $("fLoja").addEventListener("change", render);
+
+  $("tb").addEventListener("change", async ev=>{
+    const s=ev.target.closest("select[data-st]"); if(!s||!sb) return;
+    const o={status:s.value, atualizado_em:new Date().toISOString()}; if(s.value==="enviado") o.enviado_em=o.atualizado_em;
+    try{ await patch(s.dataset.st,o); } catch(e){ say("Não foi possível alterar o status: "+e.message, true); render(); }
+  });
+  $("tb").addEventListener("click", async ev=>{
+    const t=ev.target.closest("button[data-del]"); if(!t||!sb) return;
+    const id=t.dataset.del;
+    if(pendingDel!==id){ pendingDel=id; clearTimeout(delTimer); delTimer=setTimeout(()=>{pendingDel=null;render();},4000); render(); return; }
+    pendingDel=null;
+    const {error}=await sb.from(TABLE).delete().eq("id",id);
+    if(error) say("Não foi possível excluir: "+error.message, true); else say("Requisição excluída.");
+  });
+
+  // ---------- planilha de entrada ----------
+  const UNITS=["un","cx","kg","L","tambor","palete","m³"];
+  const sheet=$("sheet");
+  function unitSel(v){ const opts=UNITS.includes(v)||!v?UNITS:UNITS.concat([v]); return `<select class="c-un" aria-label="Unidade">${opts.map(u=>`<option${u===(v||"un")?" selected":""}>${esc(u)}</option>`).join("")}</select>`; }
+  function renumber(){ [...sheet.rows].forEach((tr,i)=>tr.cells[0].textContent=i+1); updateBtn(); }
+  function addRow(){
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td class="n"></td>
+      <td><input class="c-item" aria-label="Item"></td>
+      <td class="q"><input class="c-qtd" inputmode="decimal" aria-label="Quantidade"></td>
+      <td class="u">${unitSel()}</td>
+      <td><input class="c-obs" aria-label="Observação"></td>
+      <td class="x"><button type="button" class="rm" title="Remover linha" aria-label="Remover linha">×</button></td>`;
+    sheet.appendChild(tr); renumber(); return tr;
+  }
+  function resetSheet(n){ sheet.innerHTML=""; for(let i=0;i<(n||5);i++) addRow(); }
+  const parseQ = v => { let s=String(v).trim(); if(s.includes(",")) s=s.replace(/\./g,"").replace(",","."); return parseFloat(s); };
+  function filled(){ return [...sheet.rows].filter(tr=>tr.querySelector(".c-item").value.trim()||tr.querySelector(".c-qtd").value.trim()||tr.querySelector(".c-obs").value.trim()); }
+  function updateBtn(){ const n=filled().length; $("btnAdd").textContent = n>1 ? `Registrar ${n} itens` : n===1 ? "Registrar 1 item" : "Registrar itens"; }
+
+  sheet.addEventListener("input", ev=>{ const td=ev.target.closest("td"); if(td) td.classList.remove("bad"); updateBtn(); });
+  sheet.addEventListener("click", ev=>{
+    const b=ev.target.closest(".rm"); if(!b) return;
+    const tr=b.closest("tr"); if(sheet.rows.length>1) tr.remove(); else tr.querySelectorAll("input").forEach(i=>i.value="");
+    renumber();
+  });
+  sheet.addEventListener("keydown", ev=>{
+    if(ev.key!=="Enter" || !ev.target.matches("input,select")) return;
+    ev.preventDefault();
+    const td=ev.target.closest("td"), tr=td.parentElement, col=td.cellIndex;
+    const next=tr.nextElementSibling || addRow();
+    const f=next.cells[col].querySelector("input,select"); if(f) f.focus();
+  });
+  sheet.addEventListener("paste", ev=>{
+    const t=(ev.clipboardData||window.clipboardData)?.getData("text")||"";
+    if(!/[\t\n]/.test(t.trim())) return;
+    ev.preventDefault();
+    const lines=t.replace(/\r/g,"").split("\n").filter(l=>l.trim());
+    let tr=ev.target.closest("tr");
+    const startCol=ev.target.closest("td").cellIndex;
+    const colMap=[".c-item",".c-qtd",".c-un",".c-obs"];
+    lines.forEach(line=>{
+      if(!tr) tr=addRow();
+      line.split("\t").forEach((val,k)=>{
+        const ci=startCol-1+k; if(ci<0||ci>3) return;
+        const el=tr.querySelector(colMap[ci]); val=val.trim();
+        if(ci===2){ if(!val) return; const m=UNITS.find(u=>u.toLowerCase()===val.toLowerCase()); if(!m){ const o=document.createElement("option"); o.textContent=val; el.appendChild(o); el.value=val; } else el.value=m; }
+        else el.value=val;
+      });
+      tr=tr.nextElementSibling;
+    });
+    renumber(); say(lines.length+" linha(s) colada(s).");
+  });
+  $("addRow").addEventListener("click",()=>{ addRow().querySelector(".c-item").focus(); });
+  $("add5").addEventListener("click",()=>{ const f=addRow(); for(let i=0;i<4;i++) addRow(); f.querySelector(".c-item").focus(); });
+  $("clearSheet").addEventListener("click",()=>{ resetSheet(5); say(""); });
+  resetSheet(5);
+
+  $("f").addEventListener("submit", async ev=>{
+    ev.preventDefault();
+    const loja=$("loja").value.trim();
+    if(!loja){ say("Informe a loja.", true); $("loja").focus(); return; }
+    const trs=filled();
+    if(!trs.length){ say("Preencha pelo menos um item na planilha.", true); return; }
+    let bad=0; const items=[];
+    trs.forEach(tr=>{
+      const it=tr.querySelector(".c-item"), qi=tr.querySelector(".c-qtd"), q=parseQ(qi.value);
+      if(!it.value.trim()){ it.parentElement.classList.add("bad"); bad++; }
+      if(!(q>0)){ qi.parentElement.classList.add("bad"); bad++; }
+      items.push({item:it.value.trim(), quantidade:q, unidade:tr.querySelector(".c-un").value, obs:tr.querySelector(".c-obs").value.trim()});
+    });
+    if(bad){ say("Confira as células marcadas: todo item precisa de nome e quantidade maior que zero.", true); return; }
+    if(!sb){ say("Sem conexão com o banco de dados.", true); return; }
+    const btn=$("btnAdd"); btn.disabled=true;
+    const lote=Date.now().toString(36), solicitante=$("solic").value.trim(), base=Date.now();
+    const payload=items.map((x,i)=>({loja, item:x.item, quantidade:x.quantidade, unidade:x.unidade, obs:x.obs||null, solicitante:solicitante||null, status:"pendente", lote, criado_em:new Date(base+i).toISOString()}));
+    const {error}=await sb.from(TABLE).insert(payload);
+    btn.disabled=false;
+    if(error){ say("Não foi possível salvar: "+error.message, true); return; }
+    resetSheet(5);
+    say(items.length===1?"1 item registrado.":items.length+" itens registrados.");
+    sheet.rows[0].querySelector(".c-item").focus();
+  });
+
+  // ---------- copiar / relatório ----------
+  function copyText(txt, done, fail){
+    const fb=()=>{ const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); done(); }catch(e){ fail(); } ta.remove(); };
+    try{ navigator.clipboard.writeText(txt).then(done).catch(fb); }catch(e){ fb(); }
+  }
+  function textFor(list){
+    const by={}; list.forEach(r=>(by[r.loja]=by[r.loja]||[]).push(r));
+    return "REQUISIÇÃO DE COLETA DE MATERIAL\n"+Object.keys(by).sort().map(l=>"\n"+l+"\n"+by[l].map(r=>`- ${r.item}: ${fmtQ(r.quantidade)} ${r.unidade||""}${r.obs?" ("+r.obs+")":""}`).join("\n")).join("\n");
+  }
+  $("btnCopy").addEventListener("click", ()=>{
+    const fl=$("fLoja").value, list=rows.filter(r=>stOf(r)!=="coletado"&&(!fl||r.loja===fl));
+    if(!list.length){ say("Não há itens em aberto para copiar.", true); return; }
+    copyText(textFor(list), ()=>say("Lista copiada."), ()=>say("Não foi possível copiar.", true));
+  });
+  function reportItems(){
+    const loja=$("rLoja").value, inc=$("rInc").value;
+    if(!loja) return {err:"Selecione a loja do relatório."};
+    const list=rows.filter(r=>r.loja===loja && (inc==="pendente" ? stOf(r)==="pendente" : stOf(r)!=="coletado"))
+      .sort((a,b)=>String(a.criadoEm).localeCompare(String(b.criadoEm)));
+    if(!list.length) return {err:"Essa loja não tem itens "+(inc==="pendente"?"pendentes":"em aberto")+"."};
+    return {loja,list};
+  }
+  async function markSent(list){
+    if(!$("rMark").checked) return;
+    const ids=list.filter(r=>stOf(r)==="pendente").map(r=>r.id); if(!ids.length) return;
+    const now=new Date().toISOString();
+    const {error}=await sb.from(TABLE).update({status:"enviado",enviado_em:now,atualizado_em:now}).in("id",ids);
+    if(error) rsay("PDF gerado, mas não deu para marcar como enviado: "+error.message, true);
+  }
+  $("btnRCopy").addEventListener("click", ()=>{
+    const r=reportItems(); if(r.err){ rsay(r.err,true); return; }
+    copyText(textFor(r.list), ()=>{ rsay("Relatório copiado como texto."); markSent(r.list); }, ()=>rsay("Não foi possível copiar.",true));
+  });
+  $("btnPdf").addEventListener("click", async ()=>{
+    const r=reportItems(); if(r.err){ rsay(r.err,true); return; }
+    if(!window.jspdf || !window.jspdf.jsPDF){ rsay("O gerador de PDF não carregou. Recarregue a página.", true); return; }
+    const now=new Date(), pad=n=>String(n).padStart(2,"0");
+    const num="RC-"+now.getFullYear()+pad(now.getMonth()+1)+pad(now.getDate())+"-"+pad(now.getHours())+pad(now.getMinutes());
+    const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
+    const W=doc.internal.pageSize.getWidth(), M=15;
+    doc.setFillColor(31,78,95); doc.rect(0,0,W,24,"F");
+    doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(16);
+    doc.text("REQUISIÇÃO DE COLETA DE MATERIAL", M, 12);
+    doc.setFont("helvetica","normal"); doc.setFontSize(9.5);
+    doc.text("Menzoil - Compras", M, 18.5);
+    doc.text("Nº "+num, W-M, 12, {align:"right"});
+    doc.text("Emitido em "+now.toLocaleDateString("pt-BR")+" "+pad(now.getHours())+":"+pad(now.getMinutes()), W-M, 18.5, {align:"right"});
+    doc.setFontSize(9); doc.setTextColor(91,107,115); doc.text("LOJA", M, 34);
+    doc.setTextColor(22,37,44); doc.setFont("helvetica","bold"); doc.setFontSize(14); doc.text(r.loja, M, 41);
+    doc.setFont("helvetica","normal"); doc.setFontSize(10);
+    doc.text("Solicitamos a separação dos materiais abaixo para coleta. Por favor, confira as quantidades", M, 50);
+    doc.text("e assine no momento da retirada.", M, 55);
+    doc.autoTable({
+      startY:61, margin:{left:M,right:M},
+      head:[["#","Item / material","Qtd.","Un.","Observação","Solicitado em"]],
+      body:r.list.map((x,i)=>[String(i+1), x.item, fmtQ(x.quantidade), x.unidade||"", x.obs||"", fmtD(x.criadoEm)]),
+      styles:{font:"helvetica",fontSize:9.5,cellPadding:2.6,textColor:[22,37,44],lineColor:[216,223,226],lineWidth:0.2},
+      headStyles:{fillColor:[243,245,246],textColor:[91,107,115],fontStyle:"bold",fontSize:8.5},
+      columnStyles:{0:{cellWidth:9,halign:"center"},2:{halign:"right",cellWidth:18},3:{cellWidth:16},5:{cellWidth:28}},
+    });
+    let y=doc.lastAutoTable.finalY+8;
+    doc.setFontSize(9.5); doc.setTextColor(91,107,115); doc.text("Total de itens: "+r.list.length, M, y);
+    y+=26; if(y>270){ doc.addPage(); y=40; }
+    doc.setDrawColor(22,37,44); doc.setLineWidth(0.3);
+    const cw=(W-2*M-10)/2;
+    doc.line(M,y,M+cw,y); doc.line(M+cw+10,y,W-M,y);
+    doc.text("Responsável da loja (nome e assinatura)", M, y+5);
+    doc.text("Responsável pela coleta / Data", M+cw+10, y+5);
+    const pages=doc.getNumberOfPages();
+    for(let p=1;p<=pages;p++){ doc.setPage(p); doc.setFontSize(8); doc.setTextColor(140,150,155); doc.text(num+"  ·  página "+p+" de "+pages, W-M, 290, {align:"right"}); }
+    const safe=r.loja.replace(/[^\p{L}\p{N} _-]+/gu,"").trim().replace(/\s+/g,"_")||"loja";
+    doc.save(`Coleta_${safe}_${num}.pdf`);
+    rsay("PDF gerado.");
+    await markSent(r.list);
+  });
+
+  try{ const s=localStorage.getItem("coleta_solic"); if(s) $("solic").value=s; }catch(e){}
+  $("solic").addEventListener("change",()=>{ try{ localStorage.setItem("coleta_solic",$("solic").value.trim()); }catch(e){} });
+
+  // ---------- início ----------
+  render();
+  if(!window.supabase || SUPABASE_URL.startsWith("COLE_")){ setSync(false, window.supabase ? "Supabase não configurado" : "Biblioteca do Supabase não carregou"); return; }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {auth:{persistSession:false}});
+  loadAll();
+  sb.channel("coleta-live")
+    .on("postgres_changes",{event:"*",schema:"public",table:TABLE}, applyChange)
+    .subscribe(st=>{
+      if(st==="SUBSCRIBED") setSync(true,"Sincronizado em tempo real");
+      else if(st==="CHANNEL_ERROR"||st==="TIMED_OUT"||st==="CLOSED") { setSync(false,"Tempo real desconectado — recarregue a página"); }
+    });
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden && sb) loadAll(); });
+})();
+</script>
+</body>
+</html>
